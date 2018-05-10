@@ -1,0 +1,16 @@
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\UnitTests\obj\Debug\netcoreapp2.0\UnitTests.csprojResolveAssemblyReference.cache
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\UnitTests\obj\Debug\netcoreapp2.0\UnitTests.csproj.CoreCompileInputs.cache
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\UnitTests\obj\Debug\netcoreapp2.0\UnitTests.AssemblyInfoInputs.cache
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\UnitTests\obj\Debug\netcoreapp2.0\UnitTests.AssemblyInfo.cs
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\UnitTests\bin\Debug\netcoreapp2.0\xunit.runner.visualstudio.dotnetcore.testadapter.dll
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\UnitTests\bin\Debug\netcoreapp2.0\xunit.runner.reporters.netcoreapp10.dll
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\UnitTests\bin\Debug\netcoreapp2.0\xunit.runner.utility.netcoreapp10.dll
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\UnitTests\bin\Debug\netcoreapp2.0\UnitTests.deps.json
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\UnitTests\bin\Debug\netcoreapp2.0\UnitTests.runtimeconfig.json
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\UnitTests\bin\Debug\netcoreapp2.0\UnitTests.runtimeconfig.dev.json
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\UnitTests\bin\Debug\netcoreapp2.0\UnitTests.dll
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\UnitTests\bin\Debug\netcoreapp2.0\UnitTests.pdb
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\UnitTests\bin\Debug\netcoreapp2.0\MediaManager.dll
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\UnitTests\bin\Debug\netcoreapp2.0\MediaManager.pdb
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\UnitTests\obj\Debug\netcoreapp2.0\UnitTests.dll
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\UnitTests\obj\Debug\netcoreapp2.0\UnitTests.pdb

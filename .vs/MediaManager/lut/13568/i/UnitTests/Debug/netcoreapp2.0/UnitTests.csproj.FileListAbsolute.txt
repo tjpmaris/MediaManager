@@ -1,0 +1,14 @@
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\.vs\MediaManager\lut\0\b\UnitTests\Debug\netcoreapp2.0\Microsoft.VisualStudio.TestPlatform.MSTest.TestAdapter.dll
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\.vs\MediaManager\lut\0\b\UnitTests\Debug\netcoreapp2.0\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.Interface.dll
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\.vs\MediaManager\lut\0\b\UnitTests\Debug\netcoreapp2.0\Microsoft.VisualStudio.TestPlatform.MSTestAdapter.PlatformServices.dll
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\.vs\MediaManager\lut\0\b\UnitTests\Debug\netcoreapp2.0\UnitTests.deps.json
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\.vs\MediaManager\lut\0\b\UnitTests\Debug\netcoreapp2.0\UnitTests.runtimeconfig.json
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\.vs\MediaManager\lut\0\b\UnitTests\Debug\netcoreapp2.0\UnitTests.runtimeconfig.dev.json
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\.vs\MediaManager\lut\0\b\UnitTests\Debug\netcoreapp2.0\UnitTests.dll
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\.vs\MediaManager\lut\0\b\UnitTests\Debug\netcoreapp2.0\UnitTests.pdb
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\.vs\MediaManager\lut\0\i\UnitTests\Debug\netcoreapp2.0\UnitTests.csproj.CoreCompileInputs.cache
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\.vs\MediaManager\lut\0\i\UnitTests\Debug\netcoreapp2.0\UnitTests.AssemblyInfoInputs.cache
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\.vs\MediaManager\lut\0\i\UnitTests\Debug\netcoreapp2.0\UnitTests.AssemblyInfo.cs
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\.vs\MediaManager\lut\0\i\UnitTests\Debug\netcoreapp2.0\UnitTests.dll
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\.vs\MediaManager\lut\0\i\UnitTests\Debug\netcoreapp2.0\UnitTests.pdb
+D:\Neumont\Q11\Distributed Systems\code\MediaManager\.vs\MediaManager\lut\0\i\UnitTests\Debug\netcoreapp2.0\UnitTests.csprojResolveAssemblyReference.cache
