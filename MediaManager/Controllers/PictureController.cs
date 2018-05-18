@@ -1,25 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MediaManager.ApiModels;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MediaManager.Database;
+using MediaManager.Models;
+using System;
 
 namespace MediaManager.Controllers
 {
     [Produces("application/json")]
-    [Route("api/pictures")]
+    [Route("api/[controller]")]
     public class PictureController : Controller
     {
-        private static List<Picture> pictures = new List<Picture>();
+        IDAL dal;
+
+        public PictureController(IDAL dal)
+        {
+            this.dal = dal;
+        }
 
         //User
         [HttpGet]
         [Route("{id}")]
         public async Task<ActionResult> GetById(int id)
         {
-            return Ok(pictures.Where(s => s.Id == id).FirstOrDefault());
+            var picture = dal.GetPictureById(id);
+
+            return Ok(picture);
         }
 
         //User
@@ -27,73 +34,71 @@ namespace MediaManager.Controllers
         [Route("")]
         public async Task<ActionResult> Get()
         {
+            var pictures = dal.GetAllPictures();
+
             return Ok(pictures);
         }
 
         //Admin
         [HttpPost]
         [Route("")]
-        public async Task<ActionResult> Create([FromBody] Picture picture)
+        public async Task<ActionResult> Create([FromBody] Picture create)
         {
-            if(string.IsNullOrWhiteSpace(picture.Name)
-                || string.IsNullOrWhiteSpace(picture.Content))
+            if (string.IsNullOrWhiteSpace(create.Name)
+                || create.UserId <= 0)
             {
                 return BadRequest();
             }
 
-            picture.Id = 1 + (pictures.LastOrDefault()?.Id ?? 0);
-
-            pictures.Add(picture);
-
-            return Created("Created Picture", picture);
+            try
+            {
+                var picture = dal.Create(create);
+                return Created("Created Picture", picture);
+            }
+            catch (ArgumentException e)
+            {
+                return NotFound(e.Message);
+            }
         }
 
         //Admin
         [HttpPut]
         [Route("")]
-        public async Task<ActionResult> UpdateEntity([FromBody] Picture picture)
+        public async Task<ActionResult> UpdateEntity([FromBody] Picture update)
         {
-            ActionResult result = BadRequest();
-
-            if(picture.Id is null 
-                || string.IsNullOrWhiteSpace(picture.Name)
-                || string.IsNullOrWhiteSpace(picture.Content))
+            if (string.IsNullOrWhiteSpace(update.Name)
+                || update.Id <= 0
+                || update.UserId <= 0)
             {
-                return result;
+                return BadRequest();
             }
 
-            var foundPicture = pictures.Where(s => s.Id == picture.Id).FirstOrDefault();
-
-            if(!(foundPicture is null))
+            try
             {
-                foundPicture.Name = picture.Name;
-                foundPicture.Content = picture.Content;
-
-                result = Ok();
+                var picture = dal.Update(update);
+                return Ok(picture);
             }
-            else
+            catch (ArgumentException e)
             {
-                result = NotFound();
+                return NotFound(e.Message);
             }
-
-            return result;
         }
+
+        ////Admin
+        //[HttpPatch]
+        //[Route("")]
+        //public async Task<ActionResult> UpdateProperty([FromBody] Picture picture)
+        //{
+        //    return await UpdateEntity(picture);
+        //}
 
         //Admin
-        [HttpPatch]
-        [Route("")]
-        public async Task<ActionResult> UpdateProperty([FromBody] Picture picture)
-        {
-            return await UpdateEntity(picture);
-        }
-
-        //Admin
-        [HttpDelete]
-        [Route("{id}")]
-        public async Task<ActionResult> Delete(int id)
-        {
-            pictures.Remove(pictures.Where(s => s.Id == id).FirstOrDefault());
-            return Ok();
-        }
+        //[HttpDelete]
+        //[Route("{id}")]
+        //public async Task<ActionResult> Delete(int id)
+        //{
+        //    pictures.Remove(pictures.Where(s => s.Id == id).FirstOrDefault());
+        //    return Ok();
+        //}
     }
 }

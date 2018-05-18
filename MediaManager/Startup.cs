@@ -8,6 +8,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MediaManager.Models;
+using Microsoft.EntityFrameworkCore;
+using MediaManager.Database;
+using MySql.Data.EntityFrameworkCore.Extensions;
+using Newtonsoft.Json.Serialization;
+using Newtonsoft.Json;
+using MediaManager.Controllers;
 
 namespace MediaManager
 {
@@ -24,6 +31,8 @@ namespace MediaManager
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
+
+            services.AddTransient<IDAL, DAL>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
