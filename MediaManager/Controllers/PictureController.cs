@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MediaManager.Database;
 using MediaManager.Models;
 using System;
+using MySql.Data.MySqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace MediaManager.Controllers
 {
@@ -24,9 +24,20 @@ namespace MediaManager.Controllers
         [Route("{id}")]
         public async Task<ActionResult> GetById(int id)
         {
-            var picture = dal.GetPictureById(id);
+            if (id <= 0)
+            {
+                return BadRequest();
+            }
 
-            return Ok(picture);
+            try
+            {
+                var picture = dal.Get<Picture>(id);
+                return Ok(picture);
+            }
+            catch (MySqlException e)
+            {
+                return StatusCode(500);
+            }
         }
 
         //User
@@ -34,9 +45,15 @@ namespace MediaManager.Controllers
         [Route("")]
         public async Task<ActionResult> Get()
         {
-            var pictures = dal.GetAllPictures();
-
-            return Ok(pictures);
+            try
+            {
+                var pictures = dal.GetAllPictures();
+                return Ok(pictures);
+            }
+            catch (MySqlException e)
+            {
+                return StatusCode(500);
+            }
         }
 
         //Admin
@@ -55,9 +72,13 @@ namespace MediaManager.Controllers
                 var picture = dal.Create(create);
                 return Created("Created Picture", picture);
             }
-            catch (ArgumentException e)
+            catch (DbUpdateException e)
             {
-                return NotFound(e.Message);
+                return NotFound($"Could not find user with id {create.UserId}");
+            }
+            catch(MySqlException e)
+            {
+                return StatusCode(500);
             }
         }
 
@@ -82,23 +103,35 @@ namespace MediaManager.Controllers
             {
                 return NotFound(e.Message);
             }
+            catch (DbUpdateException e)
+            {
+                return NotFound($"Could not find user with id {update.UserId}");
+            }
+            catch (MySqlException e)
+            {
+                return StatusCode(500);
+            }
         }
 
-        ////Admin
-        //[HttpPatch]
-        //[Route("")]
-        //public async Task<ActionResult> UpdateProperty([FromBody] Picture picture)
-        //{
-        //    return await UpdateEntity(picture);
-        //}
-
         //Admin
-        //[HttpDelete]
-        //[Route("{id}")]
-        //public async Task<ActionResult> Delete(int id)
-        //{
-        //    pictures.Remove(pictures.Where(s => s.Id == id).FirstOrDefault());
-        //    return Ok();
-        //}
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest();
+            }
+
+            try
+            {
+                var picture = dal.Delete<Picture>(id);
+                return Ok(picture);
+            }
+            catch (MySqlException e)
+            {
+                return StatusCode(500);
+            }
+        }
     }
 }

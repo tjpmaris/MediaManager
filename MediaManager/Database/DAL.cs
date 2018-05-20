@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using MediaManager.Models;
 
 namespace MediaManager.Database
@@ -9,97 +8,89 @@ namespace MediaManager.Database
     public class DAL : IDAL
     {
 
-        MediaContext context;
-
-        public DAL()
+        public T Get<T>(int Id) where T : class
         {
-
-        }
-
-        public Picture GetPictureById(int Id)
-        {
-            using (context = new MediaContext())
+            using (MediaContext context = new MediaContext())
             {
-                return context.Pictures.Where(s => s.Id == Id).FirstOrDefault();
+                return context.Find<T>(Id);
             }
         }
 
-        //public T GetById<T>(int Id)
-        //{
-        //    using (context = new MediaContext())
-        //    {
-        //        return context.Find<T>(Id);
-        //    }
-        //}
+        public T Update<T>(T obj) where T : DBModel
+        {
+            using (MediaContext context = new MediaContext())
+            {
+                var item = Get<T>(obj.Id);
+
+                if (item != null)
+                {
+                    item.Update(obj);
+                    context.Update(item);
+                    context.SaveChanges();
+
+                    return item;
+                }
+                else
+                {
+                    throw new ArgumentException($"Could not find {typeof(T).FullName} with Id {obj.Id}");
+                }
+            }
+        }
+
+        public T Create<T>(T obj) where T : class
+        {
+            using (MediaContext context = new MediaContext())
+            {
+                context.Add<T>(obj);
+                context.SaveChanges();
+
+                return obj;
+            }
+        }
+
+        public T Delete<T>(int Id) where T : class
+        {
+            using (MediaContext context = new MediaContext())
+            {
+                var item = Get<T>(Id);
+
+                context.Remove(item);
+                context.SaveChanges();
+
+                return item;
+            }
+        }
 
         public List<Picture> GetAllPictures()
         {
-            using (context = new MediaContext())
+            using (MediaContext context = new MediaContext())
             {
                 return context.Pictures.ToList();
             }
         }
 
-        public Picture DeletePicture(int Id)
+        public List<Song> GetAllSongs()
         {
-            throw new NotImplementedException();
-        }
-
-        public Picture Update(Picture obj)
-        {
-            using(context = new MediaContext())
+            using (MediaContext context = new MediaContext())
             {
-                var foundPicture = context.Pictures.Where(s => s.Id == obj.Id).FirstOrDefault();
-
-                if(foundPicture != null)
-                {
-                    obj.UserId = foundPicture.UserId;
-
-                    foundPicture.Name = obj.Name;
-                    context.SaveChanges();
-
-                    return foundPicture;
-                }
-                else
-                {
-                    throw new ArgumentException($"Could not find picture with Id {obj.UserId}");
-                }
+                return context.Songs.ToList();
             }
         }
 
-        public Picture Create(Picture obj)
+        public List<Video> GetAllVideos()
         {
-            using (context = new MediaContext())
+            using (MediaContext context = new MediaContext())
             {
-                var user = context.Users.Where(s => s.Id == obj.UserId).FirstOrDefault();
-
-                if (user != null)
-                {
-                    var picture = new Picture() { Name = obj.Name, FilePath = "Some file path.", UserId = user.Id };
-                    context.Pictures.Add(picture);
-                    context.SaveChanges();
-                    return picture;
-                }
-                else
-                {
-                    throw new ArgumentException($"Could not find user with Id {obj.UserId}");
-                }
+                return context.Videos.ToList();
             }
         }
 
-        //public Picture UpdateProperty(Picture obj)
-        //{
-        //    int propCounter = 0;
-
-        //    if (!string.IsNullOrWhiteSpace(obj.Name))
-        //    {
-        //        ++propCounter;
-        //    }
-
-        //    using (context = new MediaContext())
-        //    {
-        //        return context.Pictures.Where(s => s.Id == Id).FirstOrDefault();
-        //    }
-        //}
+        public List<User> GetAllUsers()
+        {
+            using (MediaContext context = new MediaContext())
+            {
+                return context.Users.ToList();
+            }
+        }
     }
 }

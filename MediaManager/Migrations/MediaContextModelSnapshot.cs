@@ -69,14 +69,14 @@ namespace MediaManager.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnName("Id");
 
+                    b.Property<string>("Name")
+                        .HasColumnName("Name");
+
                     b.Property<string>("Password")
                         .HasColumnName("Password");
 
                     b.Property<int>("Role")
                         .HasColumnName("Role");
-
-                    b.Property<string>("Username")
-                        .HasColumnName("Username");
 
                     b.HasKey("Id");
 

@@ -8,16 +8,8 @@ namespace MediaManager.Models
     public enum Role { User, Admin }
 
     [Table("User")]
-    public class User
+    public class User : DBModel
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column("Id")]
-        public int Id { get; set; }
-
-        [Column("Username")]
-        public string Username { get; set; }
-
         [JsonIgnore]
         [Column("Password")]
         public string Password { get; set; }

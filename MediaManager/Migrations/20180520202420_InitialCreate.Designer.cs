@@ -11,7 +11,7 @@ using System;
 namespace MediaManager.Migrations
 {
     [DbContext(typeof(MediaContext))]
-    [Migration("20180515164244_InitialCreate")]
+    [Migration("20180520202420_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -70,14 +70,14 @@ namespace MediaManager.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnName("Id");
 
+                    b.Property<string>("Name")
+                        .HasColumnName("Name");
+
                     b.Property<string>("Password")
                         .HasColumnName("Password");
 
                     b.Property<int>("Role")
                         .HasColumnName("Role");
-
-                    b.Property<string>("Username")
-                        .HasColumnName("Username");
 
                     b.HasKey("Id");
 

@@ -1,99 +1,137 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Threading.Tasks;
-//using MediaManager.ApiModels;
-//using Microsoft.AspNetCore.Http;
-//using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Threading.Tasks;
+using MediaManager.Database;
+using MediaManager.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MySql.Data.MySqlClient;
 
-//namespace MediaManager.Controllers
-//{
-//    [Produces("application/json")]
-//    [Route("api/videos")]
-//    public class VideoController : Controller
-//    {
-//        private static List<Video> videos = new List<Video>();
+namespace MediaManager.Controllers
+{
+    [Produces("application/json")]
+    [Route("api/[controller]")]
+    public class VideoController : Controller
+    {
+        IDAL dal;
 
-//        //User
-//        [HttpGet]
-//        [Route("{id}")]
-//        public async Task<ActionResult> GetById(int id)
-//        {
-//            return Ok(videos.Where(s => s.Id == id).FirstOrDefault());
-//        }
+        public VideoController(IDAL dal)
+        {
+            this.dal = dal;
+        }
 
-//        //User
-//        [HttpGet]
-//        [Route("")]
-//        public async Task<ActionResult> Get()
-//        {
-//            return Ok(videos);
-//        }
+        //User
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<ActionResult> GetById(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest();
+            }
 
-//        //Admin
-//        [HttpPost]
-//        [Route("")]
-//        public async Task<ActionResult> Create([FromBody] Video video)
-//        {
-//            if (string.IsNullOrWhiteSpace(video.Name)
-//                || string.IsNullOrWhiteSpace(video.Content))
-//            {
-//                return BadRequest();
-//            }
+            try
+            {
+                var video = dal.Get<Video>(id);
+                return Ok(video);
+            }
+            catch (MySqlException e)
+            {
+                return StatusCode(500);
+            }
+        }
 
-//            video.Id = 1 + (videos.LastOrDefault()?.Id ?? 0);
+        //User
+        [HttpGet]
+        [Route("")]
+        public async Task<ActionResult> Get()
+        {
+            try
+            {
+                var videos = dal.GetAllVideos();
+                return Ok(videos);
+            }
+            catch (MySqlException e)
+            {
+                return StatusCode(500);
+            }
+        }
 
-//            videos.Add(video);
+        //Admin
+        [HttpPost]
+        [Route("")]
+        public async Task<ActionResult> Create([FromBody] Video create)
+        {
+            if (string.IsNullOrWhiteSpace(create.Name)
+                || create.UserId <= 0)
+            {
+                return BadRequest();
+            }
 
-//            return Created("Created Video", video);
-//        }
+            try
+            {
+                var video = dal.Create(create);
+                return Created("Created Video", video);
+            }
+            catch (DbUpdateException e)
+            {
+                return NotFound($"Could not find user with id {create.UserId}");
+            }
+            catch (MySqlException e)
+            {
+                return StatusCode(500);
+            }
+        }
 
-//        //Admin
-//        [HttpPut]
-//        [Route("")]
-//        public async Task<ActionResult> UpdateEntity([FromBody] Video video)
-//        {
-//            ActionResult result = BadRequest();
+        //Admin
+        [HttpPut]
+        [Route("")]
+        public async Task<ActionResult> UpdateEntity([FromBody] Video update)
+        {
+            if (string.IsNullOrWhiteSpace(update.Name)
+                || update.Id <= 0
+                || update.UserId <= 0)
+            {
+                return BadRequest();
+            }
 
-//            if (video.Id is null
-//                || string.IsNullOrWhiteSpace(video.Name)
-//                || string.IsNullOrWhiteSpace(video.Content))
-//            {
-//                return result;
-//            }
+            try
+            {
+                var video = dal.Update(update);
+                return Ok(video);
+            }
+            catch (ArgumentException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (DbUpdateException e)
+            {
+                return NotFound($"Could not find user with id {update.UserId}");
+            }
+            catch (MySqlException e)
+            {
+                return StatusCode(500);
+            }
+        }
 
-//            var foundVideo = videos.Where(s => s.Id == video.Id).FirstOrDefault();
+        //Admin
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest();
+            }
 
-//            if (!(foundVideo is null))
-//            {
-//                foundVideo.Name = video.Name;
-//                foundVideo.Content = video.Content;
-
-//                result = Ok();
-//            }
-//            else
-//            {
-//                result = NotFound();
-//            }
-
-//            return result;
-//        }
-
-//        //Admin
-//        [HttpPatch]
-//        [Route("")]
-//        public async Task<ActionResult> UpdateProperty([FromBody] Video video)
-//        {
-//            return await UpdateEntity(video);
-//        }
-
-//        //Admin
-//        [HttpDelete]
-//        [Route("{id}")]
-//        public async Task<ActionResult> Delete(int id)
-//        {
-//            videos.Remove(videos.Where(s => s.Id == id).FirstOrDefault());
-//            return Ok();
-//        }
-//    }
-//}
+            try
+            {
+                var video = dal.Delete<Video>(id);
+                return Ok(video);
+            }
+            catch (MySqlException e)
+            {
+                return StatusCode(500);
+            }
+        }
+    }
+}

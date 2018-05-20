@@ -1,97 +1,137 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Threading.Tasks;
-//using MediaManager.ApiModels;
-//using Microsoft.AspNetCore.Http;
-//using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Threading.Tasks;
+using MediaManager.Database;
+using MediaManager.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MySql.Data.MySqlClient;
 
-//namespace MediaManager.Controllers
-//{
-//    [Produces("application/json")]
-//    [Route("api/songs")]
-//    public class SongController : Controller
-//    {
-//        private static List<Song> songs = new List<Song>();
+namespace MediaManager.Controllers
+{
+    [Produces("application/json")]
+    [Route("api/[controller]")]
+    public class SongController : Controller
+    {
+        IDAL dal;
 
-//        //User
-//        [HttpGet]
-//        [Route("{id}")]
-//        public async Task<ActionResult> GetById(int id)
-//        {
-//            return Ok(songs.Where(s => s.Id == id).FirstOrDefault());
-//        }
+        public SongController(IDAL dal)
+        {
+            this.dal = dal;
+        }
 
-//        //User
-//        [HttpGet]
-//        [Route("")]
-//        public async Task<ActionResult> Get()
-//        {
-//            return Ok(songs);
-//        }
+        //User
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<ActionResult> GetById(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest();
+            }
 
-//        //Admin
-//        [HttpPost]
-//        [Route("")]
-//        public async Task<ActionResult> Create([FromBody] Song song)
-//        {
-//            if (string.IsNullOrWhiteSpace(song.Name)
-//                || string.IsNullOrWhiteSpace(song.Content))
-//            {
-//                return BadRequest();
-//            }
+            try
+            {
+                var song = dal.Get<Song>(id);
+                return Ok(song);
+            }
+            catch (MySqlException e)
+            {
+                return StatusCode(500);
+            }
+        }
 
-//            songs.Add(song);
+        //User
+        [HttpGet]
+        [Route("")]
+        public async Task<ActionResult> Get()
+        {
+            try
+            {
+                var songs = dal.GetAllSongs();
+                return Ok(songs);
+            }
+            catch (MySqlException e)
+            {
+                return StatusCode(500);
+            }
+        }
 
-//            return Created("Created Song", song);
-//        }
+        //Admin
+        [HttpPost]
+        [Route("")]
+        public async Task<ActionResult> Create([FromBody] Song create)
+        {
+            if (string.IsNullOrWhiteSpace(create.Name)
+                || create.UserId <= 0)
+            {
+                return BadRequest();
+            }
 
-//        //Admin
-//        [HttpPut]
-//        [Route("")]
-//        public async Task<ActionResult> UpdateEntity([FromBody] Song song)
-//        {
-//            ActionResult result = BadRequest();
+            try
+            {
+                var song = dal.Create(create);
+                return Created("Created Song", song);
+            }
+            catch (DbUpdateException e)
+            {
+                return NotFound($"Could not find user with id {create.UserId}");
+            }
+            catch (MySqlException e)
+            {
+                return StatusCode(500);
+            }
+        }
 
-//            if (song.Id is null
-//                || string.IsNullOrWhiteSpace(song.Name)
-//                || string.IsNullOrWhiteSpace(song.Content))
-//            {
-//                return result;
-//            }
+        //Admin
+        [HttpPut]
+        [Route("")]
+        public async Task<ActionResult> UpdateEntity([FromBody] Song update)
+        {
+            if (string.IsNullOrWhiteSpace(update.Name)
+                || update.Id <= 0
+                || update.UserId <= 0)
+            {
+                return BadRequest();
+            }
 
-//            var foundSong = songs.Where(s => s.Id == song.Id).FirstOrDefault();
+            try
+            {
+                var song = dal.Update(update);
+                return Ok(song);
+            }
+            catch (ArgumentException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (DbUpdateException e)
+            {
+                return NotFound($"Could not find user with id {update.UserId}");
+            }
+            catch (MySqlException e)
+            {
+                return StatusCode(500);
+            }
+        }
 
-//            if (!(foundSong is null))
-//            {
-//                foundSong.Name = song.Name;
-//                foundSong.Content = song.Content;
+        //Admin
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest();
+            }
 
-//                result = Ok();
-//            }
-//            else
-//            {
-//                result = NotFound();
-//            }
-
-//            return result;
-//        }
-
-//        //Admin
-//        [HttpPatch]
-//        [Route("")]
-//        public async Task<ActionResult> UpdateProperty([FromBody] Song song)
-//        {
-//            return await UpdateEntity(song);
-//        }
-
-//        //Admin
-//        [HttpDelete]
-//        [Route("{id}")]
-//        public async Task<ActionResult> Delete(int id)
-//        {
-//            songs.Remove(songs.Where(s => s.Id == id).FirstOrDefault());
-//            return Ok();
-//        }
-//    }
-//}
+            try
+            {
+                var song = dal.Delete<Song>(id);
+                return Ok(song);
+            }
+            catch (MySqlException e)
+            {
+                return StatusCode(500);
+            }
+        }
+    }
+}

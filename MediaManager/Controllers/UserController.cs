@@ -1,116 +1,131 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Threading.Tasks;
-//using MediaManager.ApiModels;
-//using MediaManager.Models;
-//using Microsoft.AspNetCore.Http;
-//using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Threading.Tasks;
+using MediaManager.Database;
+using MediaManager.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MySql.Data.MySqlClient;
 
-//namespace MediaManager.Controllers
-//{
-//    [Produces("application/json")]
-//    [Route("api/users")]
-//    public class UserController : Controller
-//    {
-//        private static List<User> users = new List<User>();
+namespace MediaManager.Controllers
+{
+    [Produces("application/json")]
+    [Route("api/[controller]")]
+    public class UserController : Controller
+    {
+        IDAL dal;
 
-//        //User
-//        [HttpGet]
-//        [Route("{id}")]
-//        public async Task<ActionResult> GetById(int id)
-//        {
-//            return Ok(Flatten(users.Where(s => s.Id == id).FirstOrDefault()));
-//        }
+        public UserController(IDAL dal)
+        {
+            this.dal = dal;
+        }
 
-//        //User
-//        [HttpGet]
-//        [Route("")]
-//        public async Task<ActionResult> Get()
-//        {
-//            return Ok(Flatten(users));
-//        }
+        //User
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<ActionResult> GetById(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest();
+            }
 
-//        //Admin
-//        [HttpPost]
-//        [Route("")]
-//        public async Task<ActionResult> Create([FromBody] UserCreateModify user)
-//        {
-//            if (string.IsNullOrWhiteSpace(user.Username)
-//                || string.IsNullOrWhiteSpace(user.Password))
-//            {
-//                return BadRequest();
-//            }
+            try
+            {
+                var user = dal.Get<User>(id);
+                return Ok(user);
+            }
+            catch (MySqlException e)
+            {
+                return StatusCode(500);
+            }
+        }
 
-//            users.Add(new User() { Id = (int)user.Id, Username = user.Username, Password = user.Password, Role = user.Role });
+        //User
+        [HttpGet]
+        [Route("")]
+        public async Task<ActionResult> Get()
+        {
+            try
+            {
+                var users = dal.GetAllUsers();
+                return Ok(users);
+            }
+            catch (MySqlException e)
+            {
+                return StatusCode(500);
+            }
+        }
 
-//            return Created("Created User", user);
-//        }
+        //Admin
+        [HttpPost]
+        [Route("")]
+        public async Task<ActionResult> Create([FromBody] User create)
+        {
+            if (string.IsNullOrWhiteSpace(create.Name)
+                || (int)create.Role < 0 
+                || (int)create.Role > 1)
+            {
+                return BadRequest();
+            }
 
-//        //Admin
-//        [HttpPut]
-//        [Route("")]
-//        public async Task<ActionResult> UpdateEntity([FromBody] UserCreateModify user)
-//        {
-//            if (user.Id is null
-//                || string.IsNullOrWhiteSpace(user.Username)
-//                || string.IsNullOrWhiteSpace(user.Password))
-//            {
-//                return BadRequest();
-//            }
+            try
+            {
+                var user = dal.Create(create);
+                return Created("Created User", user);
+            }
+            catch (MySqlException e)
+            {
+                return StatusCode(500);
+            }
+        }
 
-//            var foundUser = users.Where(s => s.Id == user.Id).FirstOrDefault();
+        //Admin
+        [HttpPut]
+        [Route("")]
+        public async Task<ActionResult> UpdateEntity([FromBody] User update)
+        {
+            if (string.IsNullOrWhiteSpace(update.Name)
+                || update.Id <= 0 
+                || (int)update.Role < 0
+                || (int)update.Role > 1)
+            {
+                return BadRequest();
+            }
 
-//            if (!(foundUser is null))
-//            {
-//                foundUser.Username = user.Username;
-//                foundUser.Password = user.Password;
-//                foundUser.Role = user.Role;
+            try
+            {
+                var user = dal.Update(update);
+                return Ok(user);
+            }
+            catch (ArgumentException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (MySqlException e)
+            {
+                return StatusCode(500);
+            }
+        }
 
-//                return Ok();
-//            }
-//            else
-//            {
-//                return NotFound();
-//            }
-//        }
+        //Admin
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            if (id <= 0)
+            {
+                return BadRequest();
+            }
 
-//        //Admin
-//        [HttpPatch]
-//        [Route("")]
-//        public async Task<ActionResult> UpdateProperty([FromBody] UserCreateModify user)
-//        {
-//            return await UpdateEntity(user);
-//        }
-
-//        //Admin
-//        [HttpDelete]
-//        [Route("{id}")]
-//        public async Task<ActionResult> Delete(int id)
-//        {
-//            users.Remove(users.Where(s => s.Id == id).FirstOrDefault());
-//            return Ok();
-//        }
-
-//        private FlatUser Flatten(User user)
-//        {
-//            FlatUser result = null;
-
-//            if (user != null)
-//            {
-//                result = new FlatUser(user);
-//            }
-
-//            return result;
-//        }
-
-//        private List<FlatUser> Flatten(List<User> users)
-//        {
-//            List<FlatUser> results = new List<FlatUser>();
-
-//            users?.ForEach(s => results.Add(Flatten(s)));
-
-//            return results;
-//        }
-//    }
-//}
+            try
+            {
+                var user = dal.Delete<User>(id);
+                return Ok(user);
+            }
+            catch (MySqlException e)
+            {
+                return StatusCode(500);
+            }
+        }
+    }
+}
