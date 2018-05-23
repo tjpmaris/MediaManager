@@ -8,9 +8,18 @@ using MySql.Data.MySqlClient;
 
 namespace MediaManager.Controllers
 {
+    public interface IUserController
+    {
+        Task<ActionResult> GetById(int id);
+        Task<ActionResult> Get();
+        Task<ActionResult> Create([FromBody] User create);
+        Task<ActionResult> UpdateEntity([FromBody] User update);
+        Task<ActionResult> Delete(int id);
+    }
+
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class UserController : Controller
+    public class UserController : Controller, IUserController
     {
         IDAL dal;
 

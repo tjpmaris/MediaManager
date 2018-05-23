@@ -8,9 +8,18 @@ using MySql.Data.MySqlClient;
 
 namespace MediaManager.Controllers
 {
+    public interface IVideoController
+    {
+        Task<ActionResult> GetById(int id);
+        Task<ActionResult> Get();
+        Task<ActionResult> Create([FromBody] Video create);
+        Task<ActionResult> UpdateEntity([FromBody] Video update);
+        Task<ActionResult> Delete(int id);
+    }
+
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class VideoController : Controller
+    public class VideoController : Controller, IVideoController
     {
         IDAL dal;
 
@@ -88,8 +97,7 @@ namespace MediaManager.Controllers
         public async Task<ActionResult> UpdateEntity([FromBody] Video update)
         {
             if (string.IsNullOrWhiteSpace(update.Name)
-                || update.Id <= 0
-                || update.UserId <= 0)
+                || update.Id <= 0)
             {
                 return BadRequest();
             }

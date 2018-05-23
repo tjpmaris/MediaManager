@@ -8,9 +8,18 @@ using MySql.Data.MySqlClient;
 
 namespace MediaManager.Controllers
 {
+    public interface ISongController
+    {
+        Task<ActionResult> GetById(int id);
+        Task<ActionResult> Get();
+        Task<ActionResult> Create([FromBody] Song create);
+        Task<ActionResult> UpdateEntity([FromBody] Song update);
+        Task<ActionResult> Delete(int id);
+    }
+
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class SongController : Controller
+    public class SongController : Controller, ISongController
     {
         IDAL dal;
 
@@ -88,8 +97,7 @@ namespace MediaManager.Controllers
         public async Task<ActionResult> UpdateEntity([FromBody] Song update)
         {
             if (string.IsNullOrWhiteSpace(update.Name)
-                || update.Id <= 0
-                || update.UserId <= 0)
+                || update.Id <= 0)
             {
                 return BadRequest();
             }

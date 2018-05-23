@@ -20,19 +20,24 @@ namespace MediaManager.Database
         {
             using (MediaContext context = new MediaContext())
             {
-                var item = Get<T>(obj.Id);
-
-                if (item != null)
+                using (context.Database.BeginTransaction())
                 {
-                    item.Update(obj);
-                    context.Update(item);
-                    context.SaveChanges();
+                    var item = Get<T>(obj.Id);
 
-                    return item;
-                }
-                else
-                {
-                    throw new ArgumentException($"Could not find {typeof(T).FullName} with Id {obj.Id}");
+                    if (item != null)
+                    {
+                        item.Update(obj);
+                        context.Update(item);
+                        context.SaveChanges();
+
+                        context.Database.CommitTransaction();
+
+                        return item;
+                    }
+                    else
+                    {
+                        throw new ArgumentException($"Could not find {typeof(T).FullName} with Id {obj.Id}");
+                    }
                 }
             }
         }
@@ -41,23 +46,33 @@ namespace MediaManager.Database
         {
             using (MediaContext context = new MediaContext())
             {
-                context.Add<T>(obj);
-                context.SaveChanges();
+                using (context.Database.BeginTransaction())
+                {
+                    context.Add<T>(obj);
+                    context.SaveChanges();
 
-                return obj;
+                    context.Database.CommitTransaction();
+
+                    return obj;
+                }
             }
         }
 
         public T Delete<T>(int Id) where T : class
         {
             using (MediaContext context = new MediaContext())
-            {
-                var item = Get<T>(Id);
+            { 
+                using (context.Database.BeginTransaction())
+                {
+                    var item = Get<T>(Id);
 
-                context.Remove(item);
-                context.SaveChanges();
+                    context.Remove(item);
+                    context.SaveChanges();
 
-                return item;
+                    context.Database.CommitTransaction();
+
+                    return item;
+                }
             }
         }
 

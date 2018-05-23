@@ -8,9 +8,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MediaManager.Controllers
 {
+    public interface IPictureController
+    {
+        Task<ActionResult> GetById(int id);
+        Task<ActionResult> Get();
+        Task<ActionResult> Create([FromBody] Picture create);
+        Task<ActionResult> UpdateEntity([FromBody] Picture update);
+        Task<ActionResult> Delete(int id);
+    }
+
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class PictureController : Controller
+    public class PictureController : Controller, IPictureController
     {
         IDAL dal;
 
@@ -88,8 +97,7 @@ namespace MediaManager.Controllers
         public async Task<ActionResult> UpdateEntity([FromBody] Picture update)
         {
             if (string.IsNullOrWhiteSpace(update.Name)
-                || update.Id <= 0
-                || update.UserId <= 0)
+                || update.Id <= 0)
             {
                 return BadRequest();
             }
