@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using MediaManager.Database;
 using MediaManager.Models;
@@ -8,18 +9,9 @@ using MySql.Data.MySqlClient;
 
 namespace MediaManager.Controllers
 {
-    public interface ISongController
-    {
-        Task<ActionResult> GetById(int id);
-        Task<ActionResult> Get();
-        Task<ActionResult> Create([FromBody] Song create);
-        Task<ActionResult> UpdateEntity([FromBody] Song update);
-        Task<ActionResult> Delete(int id);
-    }
-
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class SongController : Controller, ISongController
+    public class SongController : Controller
     {
         IDAL dal;
 
@@ -31,22 +23,15 @@ namespace MediaManager.Controllers
         //User
         [HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult> GetById(int id)
+        public async Task<ActionResult> GetById(Guid id)
         {
-            if (id <= 0)
+            if (id == Guid.Empty)
             {
                 return BadRequest();
             }
 
-            try
-            {
-                var song = dal.Get<Song>(id);
-                return Ok(song);
-            }
-            catch (MySqlException e)
-            {
-                return StatusCode(500);
-            }
+            var song = dal.Get<Song>(id.ToString());
+            return Ok(song);
         }
 
         //User
@@ -54,15 +39,7 @@ namespace MediaManager.Controllers
         [Route("")]
         public async Task<ActionResult> Get()
         {
-            try
-            {
-                var songs = dal.GetAllSongs();
-                return Ok(songs);
-            }
-            catch (MySqlException e)
-            {
-                return StatusCode(500);
-            }
+            return Ok(dal.GetAll<Song>());
         }
 
         //Admin
@@ -71,24 +48,13 @@ namespace MediaManager.Controllers
         public async Task<ActionResult> Create([FromBody] Song create)
         {
             if (string.IsNullOrWhiteSpace(create.Name)
-                || create.UserId <= 0)
+                || string.IsNullOrWhiteSpace(create.UserId))
             {
                 return BadRequest();
             }
 
-            try
-            {
-                var song = dal.Create(create);
-                return Created("Created Song", song);
-            }
-            catch (DbUpdateException e)
-            {
-                return NotFound($"Could not find user with id {create.UserId}");
-            }
-            catch (MySqlException e)
-            {
-                return StatusCode(500);
-            }
+            var song = dal.Create(create);
+            return Created("Created Song", song);
         }
 
         //Admin
@@ -97,49 +63,58 @@ namespace MediaManager.Controllers
         public async Task<ActionResult> UpdateEntity([FromBody] Song update)
         {
             if (string.IsNullOrWhiteSpace(update.Name)
-                || update.Id <= 0)
+                || string.IsNullOrWhiteSpace(update.Id))
             {
                 return BadRequest();
             }
 
-            try
-            {
-                var song = dal.Update(update);
-                return Ok(song);
-            }
-            catch (ArgumentException e)
-            {
-                return NotFound(e.Message);
-            }
-            catch (DbUpdateException e)
-            {
-                return NotFound($"Could not find user with id {update.UserId}");
-            }
-            catch (MySqlException e)
-            {
-                return StatusCode(500);
-            }
+            var song = dal.Update(update);
+            return Ok(song);
         }
 
         //Admin
         [HttpDelete]
         [Route("{id}")]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<ActionResult> Delete(Guid id)
         {
-            if (id <= 0)
+            if (id == Guid.Empty)
             {
                 return BadRequest();
             }
 
-            try
+            var song = dal.Delete<Song>(id.ToString());
+            return Ok(song);
+        }
+
+        [HttpPut]
+        [Route("Attach/{id}")]
+        public async Task<ActionResult> Attach(Guid id, [FromHeader]string type)
+        {
+            string fileExtention = DAL.GetFileExtension(type);
+            if (string.IsNullOrWhiteSpace(fileExtention)
+                || type != "audio/mpeg")
             {
-                var song = dal.Delete<Song>(id);
-                return Ok(song);
+                return BadRequest();
             }
-            catch (MySqlException e)
+
+            string filename = id.ToString() + fileExtention;
+            FileStream file = new FileStream(filename, FileMode.Create);
+
+            int bite = Request.Body.ReadByte();
+            while (bite >= 0)
             {
-                return StatusCode(500);
+                file.WriteByte((byte)bite);
+                bite = Request.Body.ReadByte();
             }
+
+            file.Position = 0;
+            dal.Attach(id.ToString(), file, type);
+
+            file.Close();
+
+            System.IO.File.Delete(filename);
+
+            return Ok();
         }
     }
 }

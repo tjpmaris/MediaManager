@@ -1,16 +1,6 @@
-﻿using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace MediaManager.Models
+﻿namespace MediaManager.Models
 {
-    [Table("Song")]
-    public class Song : FileModel
+    public class Song : RavenModel
     {
-        [Column("UserId")]
-        public int UserId { get; set; }
-
-        [JsonIgnore]
-        public User User { get; set; }
     }
 }

@@ -33,10 +33,7 @@ namespace MediaManager
             services.AddMvc();
 
             services.AddTransient<IDAL, DAL>();
-            services.AddTransient<IPictureController, PictureController>();
-            services.AddTransient<ISongController, SongController>();
-            services.AddTransient<IUserController, UserController>();
-            services.AddTransient<IVideoController, VideoController>();
+            services.AddTransient<Controllers.ILogger, LogController>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

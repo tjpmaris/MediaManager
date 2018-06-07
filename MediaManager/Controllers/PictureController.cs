@@ -5,21 +5,13 @@ using MediaManager.Models;
 using System;
 using MySql.Data.MySqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace MediaManager.Controllers
 {
-    public interface IPictureController
-    {
-        Task<ActionResult> GetById(int id);
-        Task<ActionResult> Get();
-        Task<ActionResult> Create([FromBody] Picture create);
-        Task<ActionResult> UpdateEntity([FromBody] Picture update);
-        Task<ActionResult> Delete(int id);
-    }
-
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class PictureController : Controller, IPictureController
+    public class PictureController : Controller
     {
         IDAL dal;
 
@@ -31,22 +23,15 @@ namespace MediaManager.Controllers
         //User
         [HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult> GetById(int id)
+        public async Task<ActionResult> GetById(Guid id)
         {
-            if (id <= 0)
+            if (id == Guid.Empty)
             {
                 return BadRequest();
             }
 
-            try
-            {
-                var picture = dal.Get<Picture>(id);
-                return Ok(picture);
-            }
-            catch (MySqlException e)
-            {
-                return StatusCode(500);
-            }
+            var picture = dal.Get<Picture>(id.ToString());
+            return Ok(picture);
         }
 
         //User
@@ -54,15 +39,9 @@ namespace MediaManager.Controllers
         [Route("")]
         public async Task<ActionResult> Get()
         {
-            try
-            {
-                var pictures = dal.GetAllPictures();
-                return Ok(pictures);
-            }
-            catch (MySqlException e)
-            {
-                return StatusCode(500);
-            }
+            var pictures = dal.GetAll<Picture>();
+            return Ok(pictures);
+
         }
 
         //Admin
@@ -71,24 +50,13 @@ namespace MediaManager.Controllers
         public async Task<ActionResult> Create([FromBody] Picture create)
         {
             if (string.IsNullOrWhiteSpace(create.Name)
-                || create.UserId <= 0)
+                || string.IsNullOrWhiteSpace(create.UserId))
             {
                 return BadRequest();
             }
 
-            try
-            {
-                var picture = dal.Create(create);
-                return Created("Created Picture", picture);
-            }
-            catch (DbUpdateException e)
-            {
-                return NotFound($"Could not find user with id {create.UserId}");
-            }
-            catch(MySqlException e)
-            {
-                return StatusCode(500);
-            }
+            var picture = dal.Create(create);
+            return Created("Created Picture", picture);
         }
 
         //Admin
@@ -97,49 +65,72 @@ namespace MediaManager.Controllers
         public async Task<ActionResult> UpdateEntity([FromBody] Picture update)
         {
             if (string.IsNullOrWhiteSpace(update.Name)
-                || update.Id <= 0)
+                || string.IsNullOrWhiteSpace(update.Id))
             {
                 return BadRequest();
             }
 
-            try
-            {
-                var picture = dal.Update(update);
-                return Ok(picture);
-            }
-            catch (ArgumentException e)
-            {
-                return NotFound(e.Message);
-            }
-            catch (DbUpdateException e)
-            {
-                return NotFound($"Could not find user with id {update.UserId}");
-            }
-            catch (MySqlException e)
-            {
-                return StatusCode(500);
-            }
+            var picture = dal.Update(update);
+            return Ok(picture);
         }
 
         //Admin
         [HttpDelete]
         [Route("{id}")]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<ActionResult> Delete(Guid id)
         {
-            if (id <= 0)
+            if (id == Guid.Empty)
             {
                 return BadRequest();
             }
 
-            try
+            var picture = dal.Delete<Picture>(id.ToString());
+            return Ok(picture);
+        }
+
+        [HttpPut]
+        [Route("Attach/{id}")]
+        public async Task<ActionResult> Attach(Guid id, [FromHeader]string type)
+        {
+            string fileExtention = DAL.GetFileExtension(type);
+            if (string.IsNullOrWhiteSpace(fileExtention)
+                || (type != "image/jpeg" && type != "image/png"))
             {
-                var picture = dal.Delete<Picture>(id);
-                return Ok(picture);
+                return BadRequest();
             }
-            catch (MySqlException e)
+
+            string filename = id.ToString() + fileExtention;
+            FileStream file = new FileStream(filename, FileMode.Create);
+
+            int bite = Request.Body.ReadByte();
+            while (bite >= 0)
             {
-                return StatusCode(500);
+                file.WriteByte((byte)bite);
+                bite = Request.Body.ReadByte();
             }
+
+            file.Position = 0;
+            dal.Attach(id.ToString(), file, type);
+
+            file.Close();
+
+            System.IO.File.Delete(filename);
+
+            return Ok();
+        }
+
+        [HttpGet]
+        [Route("Attachment/{id}")]
+        public async Task<ActionResult> GetAttachment(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                return BadRequest();
+            }
+
+            Stream stream = dal.GetAttachment(id.ToString());
+
+            return File(stream, "image/jpg");
         }
     }
 }

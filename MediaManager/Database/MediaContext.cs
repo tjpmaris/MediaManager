@@ -5,10 +5,8 @@ namespace MediaManager.Database
 {
     public class MediaContext : DbContext
     {
-        public DbSet<Picture> Pictures { get; set; }
-        public DbSet<Song> Songs { get; set; }
-        public DbSet<Video> Videos { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Log> Logs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

@@ -1,25 +1,16 @@
 ﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using MediaManager.Database;
 using MediaManager.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using MySql.Data.MySqlClient;
 
 namespace MediaManager.Controllers
 {
-    public interface IUserController
-    {
-        Task<ActionResult> GetById(int id);
-        Task<ActionResult> Get();
-        Task<ActionResult> Create([FromBody] User create);
-        Task<ActionResult> UpdateEntity([FromBody] User update);
-        Task<ActionResult> Delete(int id);
-    }
-
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class UserController : Controller, IUserController
+    public class UserController : Controller
     {
         IDAL dal;
 
@@ -31,16 +22,16 @@ namespace MediaManager.Controllers
         //User
         [HttpGet]
         [Route("{id}")]
-        public async Task<ActionResult> GetById(int id)
+        public async Task<ActionResult> GetById(string email)
         {
-            if (id <= 0)
+            if (string.IsNullOrWhiteSpace(email))
             {
                 return BadRequest();
             }
 
             try
             {
-                var user = dal.Get<User>(id);
+                var user = dal.GetUser(email);
                 return Ok(user);
             }
             catch (MySqlException e)
@@ -71,15 +62,14 @@ namespace MediaManager.Controllers
         public async Task<ActionResult> Create([FromBody] User create)
         {
             if (string.IsNullOrWhiteSpace(create.Name)
-                || (int)create.Role < 0 
-                || (int)create.Role > 1)
+                || string.IsNullOrWhiteSpace(create.Role))
             {
                 return BadRequest();
             }
 
             try
             {
-                var user = dal.Create(create);
+                var user = dal.CreateUser(create);
                 return Created("Created User", user);
             }
             catch (MySqlException e)
@@ -94,16 +84,14 @@ namespace MediaManager.Controllers
         public async Task<ActionResult> UpdateEntity([FromBody] User update)
         {
             if (string.IsNullOrWhiteSpace(update.Name)
-                || update.Id <= 0 
-                || (int)update.Role < 0
-                || (int)update.Role > 1)
+                || string.IsNullOrWhiteSpace(update.Role))
             {
                 return BadRequest();
             }
 
             try
             {
-                var user = dal.Update(update);
+                var user = dal.UpdateUser(update);
                 return Ok(user);
             }
             catch (ArgumentException e)
@@ -119,22 +107,36 @@ namespace MediaManager.Controllers
         //Admin
         [HttpDelete]
         [Route("{id}")]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<ActionResult> Delete(string email)
         {
-            if (id <= 0)
+            if (string.IsNullOrWhiteSpace(email))
             {
                 return BadRequest();
             }
 
             try
             {
-                var user = dal.Delete<User>(id);
+                var user = dal.DeleteUser(email);
                 return Ok(user);
             }
             catch (MySqlException e)
             {
                 return StatusCode(500);
             }
+        }
+
+        [HttpGet]
+        [Route("Attachment/{id}")]
+        public async Task<ActionResult> GetAttachment(Guid id)
+        {
+            if (id == Guid.Empty)
+            {
+                return BadRequest();
+            }
+
+            Stream stream = dal.GetAttachment(id.ToString());
+
+            return File(stream, "video/mp4a");
         }
     }
 }

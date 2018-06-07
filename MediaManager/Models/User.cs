@@ -1,29 +1,37 @@
 ﻿using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MediaManager.Models
 {
-    public enum Role { User, Admin }
-
     [Table("User")]
-    public class User : DBModel
+    public class User
     {
+        [Key]
+        [Column("Email")]
+        public string Email { get; set; }
+
+        [Column("Name")]
+        public string Name { get; set; }
+
         [JsonIgnore]
         [Column("Password")]
         public string Password { get; set; }
 
         [Column("Role")]
-        public Role Role { get; set; }
+        public string Role { get; set; }
 
         [JsonIgnore]
-        public List<Picture> Pictures { get; set; }
+        [Column("AuthToken")]
+        public string AuthToken { get; set; }
 
-        [JsonIgnore]
-        public List<Song> Songs { get; set; }
+        [Column("Pictures")]
+        public string Pictures { get; set; }
 
-        [JsonIgnore]
-        public List<Video> Videos { get; set; }
+        [Column("Songs")]
+        public string Songs { get; set; }
+
+        [Column("Videos")]
+        public string Videos { get; set; }
     }
 }

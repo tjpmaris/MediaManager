@@ -1,19 +1,17 @@
 ﻿using MediaManager.Models;
 using MediaManager.Controllers;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using MediaManager.Database;
+using System;
 
 namespace UnitTests
 {
     public class VideoControllerTests
     {
-        IVideoController controller;
-
+        VideoController controller;
         public VideoControllerTests()
         {
             this.controller = new VideoController(new DAL());
@@ -22,7 +20,7 @@ namespace UnitTests
         [Fact]
         public async Task PostTest()
         {
-            var actual = await controller.Create(new Video() { Name = "CreateVideo", UserId = 1 });
+            var actual = await controller.Create(new Video() { Name = "CreateVideo", UserId = "1" });
             Assert.IsType<CreatedResult>(actual);
             CreatedResult result = actual as CreatedResult;
             var item = result.Value as Video;
@@ -33,12 +31,12 @@ namespace UnitTests
         [Fact]
         public async Task GetByIdTest()
         {
-            var actual = await controller.Create(new Video() { Name = "GetIdVideo", UserId = 1 });
+            var actual = await controller.Create(new Video() { Name = "GetIdVideo", UserId = "1" });
             Assert.IsType<CreatedResult>(actual);
             CreatedResult result = actual as CreatedResult;
             var item = result.Value as Video;
 
-            var actual2 = await controller.GetById(item.Id);
+            var actual2 = await controller.GetById(Guid.Parse(item.Id));
             Assert.IsType<OkObjectResult>(actual2);
 
             OkObjectResult result2 = actual2 as OkObjectResult;
@@ -51,9 +49,9 @@ namespace UnitTests
         [Fact]
         public async Task GetAllTest()
         {
-            await controller.Create(new Video() { Name = "GetAllVideo", UserId = 1 });
-            await controller.Create(new Video() { Name = "GetAllVideo", UserId = 1 });
-            await controller.Create(new Video() { Name = "GetAllVideo", UserId = 1 });
+            await controller.Create(new Video() { Name = "GetAllVideo", UserId = "1" });
+            await controller.Create(new Video() { Name = "GetAllVideo", UserId = "1" });
+            await controller.Create(new Video() { Name = "GetAllVideo", UserId = "1" });
 
             var actual = await controller.Get();
             Assert.IsType<OkObjectResult>(actual);
@@ -66,7 +64,7 @@ namespace UnitTests
         [Fact]
         public async Task PutTest()
         {
-            var actual = await controller.Create(new Video() { Name = "PutVideo", UserId = 1 });
+            var actual = await controller.Create(new Video() { Name = "PutVideo", UserId = "1" });
             Assert.IsType<CreatedResult>(actual);
             CreatedResult result = actual as CreatedResult;
             var item = result.Value as Video;
@@ -74,7 +72,7 @@ namespace UnitTests
             var actual2 = await controller.UpdateEntity(new Video() { Id = item.Id, Name = "Put Video" });
             Assert.IsType<OkObjectResult>(actual2);
 
-            var actual3 = await controller.GetById(item.Id);
+            var actual3 = await controller.GetById(Guid.Parse(item.Id));
             Assert.IsType<OkObjectResult>(actual3);
             OkObjectResult result3 = actual3 as OkObjectResult;
             var item3 = result3.Value as Video;
@@ -85,15 +83,15 @@ namespace UnitTests
         [Fact]
         public async Task DeleteTest()
         {
-            var actual = await controller.Create(new Video() { Name = "DeleteVideo", UserId = 1 });
+            var actual = await controller.Create(new Video() { Name = "DeleteVideo", UserId = "1" });
             Assert.IsType<CreatedResult>(actual);
             CreatedResult result = actual as CreatedResult;
             var item = result.Value as Video;
 
-            var actual2 = await controller.Delete(item.Id);
+            var actual2 = await controller.Delete(Guid.Parse(item.Id));
             Assert.IsType<OkObjectResult>(actual2);
 
-            var actual3 = await controller.GetById(item.Id);
+            var actual3 = await controller.GetById(Guid.Parse(item.Id));
             Assert.IsType<OkObjectResult>(actual3);
             OkObjectResult result3 = actual3 as OkObjectResult;
             var item3 = result3.Value as Video;

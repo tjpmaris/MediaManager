@@ -5,13 +5,13 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 using MediaManager.Database;
+using System;
 
 namespace UnitTests
 {
     public class SongControllerTests
     {
-        ISongController controller;
-
+        SongController controller;
         public SongControllerTests()
         {
             this.controller = new SongController(new DAL());
@@ -20,7 +20,7 @@ namespace UnitTests
         [Fact]
         public async Task PostTest()
         {
-            var actual = await controller.Create(new Song() { Name = "CreateSong", UserId = 1 });
+            var actual = await controller.Create(new Song() { Name = "CreateSong", UserId = "1" });
             Assert.IsType<CreatedResult>(actual);
             CreatedResult result = actual as CreatedResult;
             var item = result.Value as Song;
@@ -31,12 +31,12 @@ namespace UnitTests
         [Fact]
         public async Task GetByIdTest()
         {
-            var actual = await controller.Create(new Song() { Name = "GetIdSong", UserId = 1 });
+            var actual = await controller.Create(new Song() { Name = "GetIdSong", UserId = "1" });
             Assert.IsType<CreatedResult>(actual);
             CreatedResult result = actual as CreatedResult;
             var item = result.Value as Song;
 
-            var actual2 = await controller.GetById(item.Id);
+            var actual2 = await controller.GetById(Guid.Parse(item.Id));
             Assert.IsType<OkObjectResult>(actual2);
 
             OkObjectResult result2 = actual2 as OkObjectResult;
@@ -49,9 +49,9 @@ namespace UnitTests
         [Fact]
         public async Task GetAllTest()
         {
-            await controller.Create(new Song() { Name = "GetAllSong", UserId = 1 });
-            await controller.Create(new Song() { Name = "GetAllSong", UserId = 1 });
-            await controller.Create(new Song() { Name = "GetAllSong", UserId = 1 });
+            await controller.Create(new Song() { Name = "GetAllSong", UserId = "1" });
+            await controller.Create(new Song() { Name = "GetAllSong", UserId = "1" });
+            await controller.Create(new Song() { Name = "GetAllSong", UserId = "1" });
 
             var actual = await controller.Get();
             Assert.IsType<OkObjectResult>(actual);
@@ -64,7 +64,7 @@ namespace UnitTests
         [Fact]
         public async Task PutTest()
         {
-            var actual = await controller.Create(new Song() { Name = "PutSong", UserId = 1 });
+            var actual = await controller.Create(new Song() { Name = "PutSong", UserId = "1" });
             Assert.IsType<CreatedResult>(actual);
             CreatedResult result = actual as CreatedResult;
             var item = result.Value as Song;
@@ -72,7 +72,7 @@ namespace UnitTests
             var actual2 = await controller.UpdateEntity(new Song() { Id = item.Id, Name = "Put Song" });
             Assert.IsType<OkObjectResult>(actual2);
 
-            var actual3 = await controller.GetById(item.Id);
+            var actual3 = await controller.GetById(Guid.Parse(item.Id));
             Assert.IsType<OkObjectResult>(actual3);
             OkObjectResult result3 = actual3 as OkObjectResult;
             var item3 = result3.Value as Song;
@@ -83,15 +83,15 @@ namespace UnitTests
         [Fact]
         public async Task DeleteTest()
         {
-            var actual = await controller.Create(new Song() { Name = "DeleteSong", UserId = 1 });
+            var actual = await controller.Create(new Song() { Name = "DeleteSong", UserId = "1" });
             Assert.IsType<CreatedResult>(actual);
             CreatedResult result = actual as CreatedResult;
             var item = result.Value as Song;
 
-            var actual2 = await controller.Delete(item.Id);
+            var actual2 = await controller.Delete(Guid.Parse(item.Id));
             Assert.IsType<OkObjectResult>(actual2);
 
-            var actual3 = await controller.GetById(item.Id);
+            var actual3 = await controller.GetById(Guid.Parse(item.Id));
             Assert.IsType<OkObjectResult>(actual3);
             OkObjectResult result3 = actual3 as OkObjectResult;
             var item3 = result3.Value as Song;
